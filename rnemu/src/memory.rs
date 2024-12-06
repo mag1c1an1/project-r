@@ -1,6 +1,5 @@
 use core::panic;
 
-use tklog::info;
 
 use crate::common::{Paddr, Word};
 

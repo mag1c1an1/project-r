@@ -4,7 +4,7 @@ use crate::{common::Vaddr, cpu::CPU};
 use lazy_static::lazy_static;
 
 lazy_static! {
-    static ref NEMU: Arc<Mutex<Nemu>> = Arc::new(Mutex::new(Nemu::new()));
+    // static ref NEMU: Arc<Mutex<Nemu>> = Arc::new(Mutex::new(Nemu::new()));
 }
 
 enum State {
@@ -41,5 +41,5 @@ impl Nemu {
 }
 
 pub fn engine_start() {
-    NEMU.lock().unwrap().exec();
+    // NEMU.lock().unwrap().exec();
 }

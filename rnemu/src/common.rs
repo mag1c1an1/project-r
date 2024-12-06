@@ -3,6 +3,16 @@ pub type SWord = i32;
 pub type Vaddr = Word;
 pub type Paddr = u32;
 
+macro_rules! mux {
+    ($($pred:tt)*, $a:expr,$b:expr) => {
+        if cfg!(pred) {
+            $a
+        } else {
+            $b
+        }
+    };
+}
+
 macro_rules! bitmask {
     ($x:expr) => {
         1 << ($x - 1)
