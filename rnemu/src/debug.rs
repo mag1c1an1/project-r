@@ -23,9 +23,8 @@ macro_rules! function_name {
 
 macro_rules! _log_file {
     ($arg:expr) => {
-        use crate::debug::LOG_FILE;
-        use std::io::Write;
-        if let Some(mtx) = LOG_FILE.get() {
+        if let Some(mtx) = $crate::debug::LOG_FILE.get() {
+            use std::io::Write;
             let mut f = mtx.lock().expect("Get LOG_FILE Failed");
             write!(*f, "{}\n", $arg).expect("Write to LOG_FILE Failed");
         }
@@ -46,11 +45,13 @@ macro_rules! myfile {
 macro_rules! log {
     () => {};
     ($($arg:tt)+) => {
-        use colored::Colorize;
+        {
+            use colored::Colorize;
         let x = format!("{}",format_args!($($arg)+));
         let blue = format!("[{}:{} {}]",myfile!(),line!(),function_name!()).truecolor(59,142,234).bold();
         println!("{} {}",blue,x);
         _log_file!(x);
+        }
     };
 }
 

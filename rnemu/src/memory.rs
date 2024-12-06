@@ -1,6 +1,5 @@
 use core::panic;
 
-
 use crate::common::{Paddr, Word};
 
 const MBASE: usize = 0x80000000;

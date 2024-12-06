@@ -4,8 +4,8 @@ pub type Vaddr = Word;
 pub type Paddr = u32;
 
 macro_rules! mux {
-    ($($pred:tt)*, $a:expr,$b:expr) => {
-        if cfg!(pred) {
+    ($pred:tt, $a:expr,$b:expr) => {
+        if cfg!($pred) {
             $a
         } else {
             $b

@@ -1,4 +1,3 @@
-
 pub fn pattern_decode(pattern: &str) -> Result<(u64, u64, u64), String> {
     let mut key: u64 = 0;
     let mut mask: u64 = 0;

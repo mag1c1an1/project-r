@@ -1,6 +1,7 @@
 use std::sync::OnceLock;
 
 use clap::Parser;
+use colored::Colorize;
 
 use crate::{debug::init_log, isa::GUEST_ISA, time::now};
 
@@ -8,9 +9,7 @@ static PORT: OnceLock<usize> = OnceLock::new();
 
 fn welcome() {
     //   Log("Trace: %s", MUXDEF(CONFIG_TRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
-    //   IFDEF(CONFIG_TRACE, Log("If trace is enabled, a log file will be generated "
-    //         "to record the trace. This may lead to a large log file. "
-    //         "If it is not necessary, you can disable it in menuconfig"));
+    log!("Trace: {}", mux!(trace, "ON".green(), "OFF".red().bold()));
     if cfg!(trace) {
         log!(
             "If trace is enabled, a log file will be generated to record the trace. \
