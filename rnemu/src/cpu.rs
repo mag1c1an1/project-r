@@ -1,4 +1,4 @@
-use crate::{common::Word, isa::ISA, memory::MemoryBank};
+use crate::{common::Word, isa::ISA};
 
 pub mod decode;
 
