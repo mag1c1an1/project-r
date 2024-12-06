@@ -7,3 +7,4 @@ edition = "2021"
 lazy_static = "1.5"
 colored = "2"
 clap = { version = "4.5.23", features = ["derive"] }
+chrono = "0.4"

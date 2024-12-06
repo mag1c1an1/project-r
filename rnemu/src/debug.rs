@@ -32,12 +32,23 @@ macro_rules! _log_file {
     };
 }
 
+macro_rules! myfile {
+    () => {{
+        let x = file!();
+        if let Some(n) = x.find('/') {
+            &x[n + 1..]
+        } else {
+            x
+        }
+    }};
+}
+
 macro_rules! log {
     () => {};
     ($($arg:tt)+) => {
         use colored::Colorize;
         let x = format!("{}",format_args!($($arg)+));
-        let blue = format!("[{}:{} {}]",file!(),line!(),function_name!()).truecolor(59,142,234).bold();
+        let blue = format!("[{}:{} {}]",myfile!(),line!(),function_name!()).truecolor(59,142,234).bold();
         println!("{} {}",blue,x);
         _log_file!(x);
     };
@@ -53,6 +64,7 @@ pub fn init_log(file: Option<String>) {
 #[cfg(test)]
 mod tests {
     use crate::debug::init_log;
+    use chrono::FixedOffset;
     use colored::Colorize;
     use std::fs::File;
     use std::io::Write;
@@ -114,7 +126,15 @@ mod tests {
         //     .red()
         //     .bold()
         //     .clear();
-        println!("{}", "purple and magenta are the same".purple().magenta());
+        println!(
+            "{}",
+            "purple and magenta are the same"
+                .purple()
+                .magenta()
+                .bold()
+                .bold()
+                .bold()
+        );
         // "and so are normal and clear".normal().clear();
         // "you can specify color by string"
         //     .color("blue")
@@ -128,5 +148,23 @@ mod tests {
         //     "{:.3}",
         //     "and this will be green but truncated to 3 chars".green()
         // );
+    }
+
+    #[test]
+    fn myfile_test() {
+        println!("{}", myfile!());
+    }
+
+    #[test]
+    fn time_test() {
+        use chrono::{DateTime, Local};
+
+        let dt = Local::now();
+        println!("{}", dt);
+        let naive_utc = dt.naive_utc();
+        let offset = FixedOffset::east_opt(8 * 3600).unwrap();
+        let dt_new = DateTime::<Local>::from_naive_utc_and_offset(naive_utc, offset);
+        println!("{}", dt_new);
+        // assert_eq!(dt, dt_new);
     }
 }

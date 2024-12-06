@@ -2,6 +2,8 @@ use std::sync::OnceLock;
 
 use clap::Parser;
 
+use crate::{debug::init_log, isa::GUEST_ISA, time::now};
+
 static PORT: OnceLock<usize> = OnceLock::new();
 
 fn welcome() {
@@ -9,11 +11,16 @@ fn welcome() {
     //   IFDEF(CONFIG_TRACE, Log("If trace is enabled, a log file will be generated "
     //         "to record the trace. This may lead to a large log file. "
     //         "If it is not necessary, you can disable it in menuconfig"));
-    //   Log("Build time: %s, %s", __TIME__, __DATE__);
-    //   printf("Welcome to %s-NEMU!\n", ANSI_FMT(str(__GUEST_ISA__), ANSI_FG_YELLOW ANSI_BG_RED));
-    println!("Welcome to {}-NEMU!", "RISC-V");
-    //   printf("For help, type \"help\"\n");
-    //   Log("Exercise: Please remove me in the source code and compile NEMU again.");
+    if cfg!(trace) {
+        log!(
+            "If trace is enabled, a log file will be generated to record the trace. \
+            This may lead to a large log file. \
+            If it is not necessary, you can disable it in memuconfig.",
+        );
+    }
+    log!("Build time: {}", now().format("%H:%M:%S %Y-%m-%d"));
+    println!("Welcome to {}-NEMU!", GUEST_ISA.yellow().on_red());
+    println!("For help, type \"help\"\n");
 }
 
 fn load_img() {}
@@ -37,5 +44,6 @@ struct Args {
 
 pub fn init_monitor() {
     let args = Args::parse();
+    init_log(args.log);
     welcome();
 }

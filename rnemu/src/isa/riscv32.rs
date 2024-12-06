@@ -2,6 +2,9 @@ use crate::{
     common::{Vaddr, Word},
     cpu::{decode::pattern_decode, CPU},
 };
+
+pub const GUEST_ISA: &'static str = "riscv32";
+
 pub struct Riscv32CpuState {
     pub gpr: [Word; 32],
     pub pc: Vaddr,
