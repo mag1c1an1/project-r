@@ -8,3 +8,16 @@ lazy_static = "1.5"
 colored = "2"
 clap = { version = "4.5.23", features = ["derive"] }
 chrono = "0.4"
+cfg-if = "1.0"
+spin = "0.9"
+
+[features]
+default = ["riscv32"]
+trace = []
+device = []
+64bit = []
+32bit = []
+x86 = []
+x86-64 = []
+riscv32 = ["32bit"]
+riscv64 = []

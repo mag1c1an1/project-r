@@ -6,11 +6,10 @@ use colored::Colorize;
 use crate::{debug::init_log, isa::GUEST_ISA, time::now};
 
 static PORT: OnceLock<usize> = OnceLock::new();
-
 fn welcome() {
-    //   Log("Trace: %s", MUXDEF(CONFIG_TRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
-    log!("Trace: {}", mux!(trace, "ON".green(), "OFF".red().bold()));
-    if cfg!(trace) {
+    log!("Trace: {}", mux!("trace", "ON".green(), "OFF".red().bold()));
+
+    if cfg!(feature = "trace") {
         log!(
             "If trace is enabled, a log file will be generated to record the trace. \
             This may lead to a large log file. \

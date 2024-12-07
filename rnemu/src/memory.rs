@@ -11,9 +11,16 @@ const RESET_VECTOR: usize = PMEM_LEFT + PC_RESET_OFFSET;
 
 static mut PMEM: [u8; MSIZE] = [0; MSIZE];
 
-// pub struct MemoryBank {
-//     data: Vec<u8>,
-// }
+pub struct MemoryBank {
+    start: Paddr,
+    data: Vec<u8>,
+}
+
+impl MemoryBank {
+    pub fn inst_fetch(&self) -> Word {
+        todo!()
+    }
+}
 
 fn host_read(addr: usize, len: usize) -> Word {
     unsafe {

@@ -1,11 +1,15 @@
-pub type Word = u32;
-pub type SWord = i32;
-pub type Vaddr = Word;
-pub type Paddr = u32;
+cfg_if::cfg_if! {
+    if #[cfg(feature = "32bit")] {
+        pub type Word = u32;
+        pub type SWord = i32;
+        pub type Vaddr = Word;
+        pub type Paddr = u32;
+    }
+}
 
 macro_rules! mux {
-    ($pred:tt, $a:expr,$b:expr) => {
-        if cfg!($pred) {
+    ($name:tt, $a:expr,$b:expr) => {
+        if cfg!(feature = $name) {
             $a
         } else {
             $b
@@ -31,9 +35,9 @@ macro_rules! sext {
         let value = ($x as u64) & mask; // 保留低 $len 位
         if value & (1 << ($len - 1)) != 0 {
             // 如果符号位为1，则扩展符号
-            value | !mask
+            (value | !mask) as Word
         } else {
-            value
+            (value) as Word
         }
     }};
 }
