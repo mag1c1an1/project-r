@@ -1,1 +1,1 @@
-# Nanjin University's Projgect N but Rust Version
+# Nanjin University's Project-N but Rust Version
