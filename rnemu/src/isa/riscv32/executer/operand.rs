@@ -64,8 +64,11 @@ impl OperandHelper for BOperand {
 pub struct UOperand;
 impl OperandHelper for UOperand {
     fn decode_operand(&self, inst: Word, isa: &Riscv32) -> Args {
+        let rs1 = bits!(inst, 19, 15);
+        let rs2 = bits!(inst, 24, 20);
+        let rd = bits!(inst, 11, 7);
         let imm = sext!(bits!(inst, 31, 12), 20) << 12;
-        Args::new(0, 0, 0, imm)
+        Args::new(rd as usize, 0, 0, imm)
     }
 }
 pub struct JOperand;

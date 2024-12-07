@@ -3,7 +3,7 @@ use std::sync::OnceLock;
 use clap::Parser;
 use colored::Colorize;
 
-use crate::{debug::init_log, isa::GUEST_ISA, time::now};
+use crate::{core::init_nemu, debug::init_log, isa::GUEST_ISA, time::now};
 
 static PORT: OnceLock<usize> = OnceLock::new();
 fn welcome() {
@@ -18,7 +18,7 @@ fn welcome() {
     }
     log!("Build time: {}", now().format("%H:%M:%S %Y-%m-%d"));
     println!("Welcome to {}-NEMU!", GUEST_ISA.yellow().on_red());
-    println!("For help, type \"help\"\n");
+    println!("For help, type \"help\"");
 }
 
 fn load_img() {}
@@ -38,10 +38,15 @@ struct Args {
     /// run DiffTtest with port PORT
     #[arg(short)]
     port: Option<String>,
+    #[arg(short)]
+    /// img file
+    image_file: Option<String>,
 }
 
 pub fn init_monitor() {
     let args = Args::parse();
     init_log(args.log);
+    init_nemu(args.image_file);
+    
     welcome();
 }

@@ -111,7 +111,7 @@ macro_rules! pat {
     }};
 }
 
-struct Executer {
+pub struct Executer {
     pc: Vaddr,
     snpc: Vaddr,
     dnpc: Vaddr,
@@ -120,9 +120,9 @@ struct Executer {
 }
 
 impl Executer {
-    pub fn new(pc: Vaddr) -> Self {
+    pub fn new() -> Self {
         Self {
-            pc,
+            pc: 0,
             snpc: 0,
             dnpc: 0,
             inst: 0,
@@ -130,33 +130,46 @@ impl Executer {
         }
     }
 
-    fn exec_once(&mut self, cpu: &mut Riscv32, mem: &mut MemoryBank) {
-        self.inst = mem.inst_fetch();
+    pub fn exec_once(&mut self, cpu: &mut Riscv32, mem: &mut MemoryBank) -> Result<(), Vaddr> {
+        self.inst = mem.inst_fetch(&mut self.snpc, 4);
+        self.dnpc = self.snpc;
         let guard = self.decoders.lock();
         for d in guard.iter() {
-            if let Some((a, b, c)) = d.decode(self.inst) {
-                d.apply(self.inst, cpu, mem);
-                break;
+            if let Some((key, mask, shift)) = d.decode(self.inst) {
+                if ((self.inst as u64) >> shift) & mask == key {
+                    d.apply(self.inst, cpu, mem);
+                    cpu.set_reg(0, 0);
+                    return Ok(());
+                }
             }
         }
+        Err(self.pc)
+    }
+    pub fn set_pc(&mut self, pc: Vaddr) {
+        self.pc = pc;
+    }
+    pub fn set_snpc(&mut self, snpc: Vaddr) {
+        self.snpc = snpc;
+    }
+
+    pub fn dnpc(&self) -> Vaddr {
+        self.dnpc
     }
 }
 
 lazy_static::lazy_static! {
     static ref DECODERS: Arc<SpinMutex<Vec<Box<dyn Decode>>>> = {
-
-       let decoders =  vec!{
-        pat!(
-            "??????? ????? ????? ??? ????? 00101 11",
-            auipc,
-            OperandType::U,
-            |cpu: &mut Riscv32, mem: &MemoryBank,args:Args| {
-                cpu.set_reg(args.rd, cpu.pc + args.imm);
-            }
-        ),};
+        let decoders =  vec!{
+            // pat!(
+            //     "??????? ????? ????? ??? ????? 00101 11",
+            //     auipc,
+            //     OperandType::U,
+            //     |cpu: &mut Riscv32, mem: &MemoryBank,args:Args| {
+            //         cpu.set_reg(args.rd, cpu.pc + args.imm);
+            //     }
+            // ),
+        };
         Arc::new(SpinMutex::new(decoders))
-
-
     };
 }
 mod tests {
@@ -170,7 +183,7 @@ mod tests {
             "00000 00 0 00 0 00 0",
             li,
             OperandType::U,
-            |cpu: &mut Riscv32, mem: &MemoryBank| { cpu.set_pc(3) }
+            |cpu: &mut Riscv32, mem: &MemoryBank, args: Args| { cpu.set_pc(3) }
         );
         let y = |cpu: &mut Riscv32, mem: &MemoryBank| {
             cpu.set_pc(3);
@@ -179,7 +192,7 @@ mod tests {
 
     #[test]
     fn executer_test() {
-        let executer = Executer::new(0);
+        let executer = Executer::new();
         println!("success");
     }
 }

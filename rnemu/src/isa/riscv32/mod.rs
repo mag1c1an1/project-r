@@ -3,7 +3,7 @@ use crate::common::{Vaddr, Word};
 use super::ISA;
 
 mod executer;
-
+pub use executer::Executer;
 pub const GUEST_ISA: &'static str = "riscv32";
 
 #[derive(Default, Debug)]
@@ -13,40 +13,47 @@ pub struct Riscv32 {
 }
 
 impl Riscv32 {
-    pub fn new() -> Self {
-        Self {
-            gpr: [0; 32],
-            pc: 0,
-        }
+    pub fn new(pc: Vaddr) -> Self {
+        Self { gpr: [0; 32], pc }
     }
 }
 
 impl ISA for Riscv32 {
+    type Executer = executer::Executer;
     fn set_pc(&mut self, next: Vaddr) {
-        todo!()
+        self.pc = next;
     }
 
     fn pc(&self) -> Vaddr {
-        todo!()
+        self.pc
     }
 
     fn reg(&self, idx: usize) -> Word {
-        todo!()
+        self.gpr[idx]
     }
 
-    fn set_reg(&self, idx: usize, val: Word) {
-        todo!()
+    fn set_reg(&mut self, idx: usize, val: Word) {
+        self.gpr[idx] = val;
+    }
+
+    fn default_img() -> &'static [u8] {
+        let ptr = IMG.as_ptr() as *const u8;
+        let len = IMG.len() * std::mem::size_of::<u32>();
+        unsafe { std::slice::from_raw_parts(ptr, len) }
+    }
+
+    fn executer() -> Self::Executer {
+        executer::Executer::new()
     }
 }
 
-const ISA_LOGO: &'static str = r"
-       _                         __  __                         _ 
+pub const ISA_LOGO: &'static str = 
+r"       _                         __  __                         _ 
       (_)                       |  \/  |                       | |
   _ __ _ ___  ___ ________   __ | \  / | __ _ _ __  _   _  __ _| |
  | '__| / __|/ __|______\ \ / / | |\/| |/ _` | '_ \| | | |/ _` | |
  | |  | \__ \ (__        \ V /  | |  | | (_| | | | | |_| | (_| | |
  |_|  |_|___/\___|        \_/   |_|  |_|\__,_|_| |_|\__,_|\__,_|_|
-
 ";
 
 const IMG: [u32; 5] = [

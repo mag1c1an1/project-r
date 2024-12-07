@@ -3,6 +3,7 @@ use std::{fs::File, sync::OnceLock};
 
 pub static LOG_FILE: OnceLock<Mutex<File>> = OnceLock::new();
 
+#[macro_export]
 macro_rules! function_name {
     () => {{
         // Okay, this is ugly, I get it. However, this is the best we can get on a stable rust.
@@ -21,6 +22,7 @@ macro_rules! function_name {
     }};
 }
 
+#[macro_export]
 macro_rules! _log_file {
     ($arg:expr) => {
         if let Some(mtx) = $crate::debug::LOG_FILE.get() {
@@ -30,7 +32,7 @@ macro_rules! _log_file {
         }
     };
 }
-
+#[macro_export]
 macro_rules! myfile {
     () => {{
         let x = file!();
@@ -42,15 +44,16 @@ macro_rules! myfile {
     }};
 }
 
+#[macro_export]
 macro_rules! log {
     () => {};
     ($($arg:tt)+) => {
         {
             use colored::Colorize;
         let x = format!("{}",format_args!($($arg)+));
-        let blue = format!("[{}:{} {}]",myfile!(),line!(),function_name!()).truecolor(59,142,234).bold();
+        let blue = format!("[{}:{} {}]",$crate::myfile!(),line!(),$crate::function_name!()).truecolor(59,142,234).bold();
         println!("{} {}",blue,x);
-        _log_file!(x);
+        $crate::_log_file!(x);
         }
     };
 }
