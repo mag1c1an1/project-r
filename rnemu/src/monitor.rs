@@ -1,11 +1,20 @@
-use std::sync::OnceLock;
+use std::{sync::OnceLock, u64};
 
 use clap::Parser;
 use colored::Colorize;
+use sdb::{init_sdb, main_loop};
 
-use crate::{core::init_nemu, debug::init_log, isa::GUEST_ISA, time::now};
+use crate::{
+    core::{init_nemu, nemu_exec},
+    debug::init_log,
+    isa::GUEST_ISA,
+    time::now,
+};
 
 static PORT: OnceLock<usize> = OnceLock::new();
+
+mod sdb;
+
 fn welcome() {
     log!("Trace: {}", mux!("trace", "ON".green(), "OFF".red().bold()));
 
@@ -47,6 +56,13 @@ pub fn init_monitor() {
     let args = Args::parse();
     init_log(args.log);
     init_nemu(args.image_file);
-    
+    init_sdb(args.batch);
     welcome();
+}
+pub fn engine_start() {
+    if cfg!(feature = "am") {
+        nemu_exec(u64::MAX);
+    } else {
+        main_loop();
+    }
 }

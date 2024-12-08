@@ -201,6 +201,6 @@ pub fn init_nemu(img: Option<String>) {
     }
 }
 
-pub fn engine_start() {
+pub fn nemu_exec(n: u64) {
     NEMU.get().unwrap().lock().exec(u64::MAX);
 }

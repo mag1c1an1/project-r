@@ -1,7 +1,6 @@
 #![allow(unused)]
 
-use core::engine_start;
-use monitor::init_monitor;
+use monitor::{engine_start, init_monitor};
 
 #[macro_use]
 mod common;
