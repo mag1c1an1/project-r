@@ -12,7 +12,7 @@ cfg-if = "1.0"
 spin = "0.9"
 num-format = "0.4"
 rustyline = "15.0.0"
-
+nom = "7.1"
 [features]
 default = ["riscv32"]
 trace = []

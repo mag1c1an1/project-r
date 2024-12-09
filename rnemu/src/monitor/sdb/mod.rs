@@ -1,23 +1,37 @@
 use std::{sync::OnceLock, u64};
 
+use interpreter::interpret_expr;
 use lazy_static::lazy_static;
+use parser::parse;
 use rustyline::error::ReadlineError;
 use spin::mutex::SpinMutex;
+use tokenizer::tokenize;
 
 use crate::core::nemu_exec;
 
+mod expr;
+mod interpreter;
+mod parser;
+mod tokenizer;
+mod value;
+
 static DEBUGGER: OnceLock<SpinMutex<Debugger>> = OnceLock::new();
 
+#[derive(Default)]
 struct Debugger {
     batch_mode: bool,
+    p_count: i32,
 }
 
 impl Debugger {
     pub fn new(batch_mode: bool) -> Self {
-        Self { batch_mode }
+        Self {
+            batch_mode,
+            ..Default::default()
+        }
     }
 
-    pub fn run(&self) {
+    pub fn run(&mut self) {
         if self.batch_mode {
             nemu_exec(u64::MAX);
         }
@@ -48,7 +62,7 @@ impl Debugger {
         rl.save_history("history.txt");
     }
 
-    fn exec(&self, line: &str) -> i32 {
+    fn exec(&mut self, line: &str) -> i32 {
         let splits: Vec<&str> = line.split_whitespace().collect();
         let (head, args) = (splits[0], &splits[1..].join(" "));
         match head {
@@ -56,6 +70,8 @@ impl Debugger {
                 nemu_exec(u64::MAX);
                 return -1;
             }
+            "si" => cmd_si(args),
+            "p" => self.cmd_p(args),
             "help" => cmd_help(args),
             "q" => {
                 return -1;
@@ -65,6 +81,14 @@ impl Debugger {
             }
         }
         0
+    }
+
+    fn cmd_p(&mut self, input: &str) {
+        self.p_count += 1;
+        let tokens = tokenize(input).unwrap();
+        let e = parse(tokens).unwrap();
+        let val = interpret_expr(&e);
+        println!("${} = {}", self.p_count, val);
     }
 }
 
@@ -99,6 +123,16 @@ fn cmd_help(arg: &str) {
         println!("Unknown Command: {}", arg);
     }
 }
+
+fn cmd_si(arg: &str) {
+    if let Ok(step) = arg.parse::<u64>() {
+        nemu_exec(step);
+    } else {
+        println!("Parse Number Failed: {}", arg);
+    }
+}
+
+fn cmd_p(arg: &str) {}
 
 pub fn init_sdb(b: bool) {
     DEBUGGER.get_or_init(|| SpinMutex::new(Debugger::new(b)));

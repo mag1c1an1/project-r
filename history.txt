@@ -48,3 +48,9 @@ help      x
 q
 help x
 q
+p 0x888888
+q
+p 3 + 3
+p 5+5
+p 3 * 100
+q
