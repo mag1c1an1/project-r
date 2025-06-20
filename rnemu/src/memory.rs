@@ -118,3 +118,115 @@ impl MemoryBank {
 //     //   IFDEF(CONFIG_DEVICE, mmio_write(addr, len, data); return);
 //     out_of_bound(addr);
 // }
+
+#[derive(Default)]
+pub struct Memory {
+    /// Memory content
+    data: Vec<u64>,
+}
+
+impl Memory {
+    pub fn read_byte(&self, address: u64) -> u8 {
+        todo!()
+    }
+    pub fn read_halfword(&self, address: u64) -> u16 {
+        todo!()
+    }
+    pub fn read_word(&self, address: u64) -> u32 {
+        todo!()
+    }
+    pub fn read_doubleworld(&self, address: u64) -> u64 {
+        todo!()
+    }
+
+    /// Reads multiple bytes from memory.
+    ///
+    /// # Arguments
+    /// * `address`
+    /// * `width` up to eight
+    pub fn read_bytes(&self, address: u64, width: u64) -> u64 {
+        let mut data = 0 as u64;
+        for i in 0..width {
+            data |= (self.read_byte(address.wrapping_add(i)) as u64) << (i * 8);
+        }
+        data
+    }
+
+    /// Writes a byte to memory.
+    ///
+    /// # Arguments
+    /// * `address`
+    /// * `value`
+    pub fn write_byte(&mut self, address: u64, value: u8) {
+        let index = (address >> 3) as usize;
+        let pos = ((address % 8) as u64) * 8;
+        self.data[index] = (self.data[index] & !(0xff << pos)) | ((value as u64) << pos);
+    }
+
+    /// Writes two bytes to memory.
+    ///
+    /// # Arguments
+    /// * `address`
+    /// * `value`
+    pub fn write_halfword(&mut self, address: u64, value: u16) {
+        if (address % 2) == 0 {
+            let index = (address >> 3) as usize;
+            let pos = ((address % 8) as u64) * 8;
+            self.data[index] = (self.data[index] & !(0xffff << pos)) | ((value as u64) << pos);
+        } else {
+            self.write_bytes(address, value as u64, 2);
+        }
+    }
+
+    /// Writes four bytes to memory.
+    ///
+    /// # Arguments
+    /// * `address`
+    /// * `value`
+    pub fn write_word(&mut self, address: u64, value: u32) {
+        if (address % 4) == 0 {
+            let index = (address >> 3) as usize;
+            let pos = ((address % 8) as u64) * 8;
+            self.data[index] = (self.data[index] & !(0xffffffff << pos)) | ((value as u64) << pos);
+        } else {
+            self.write_bytes(address, value as u64, 4);
+        }
+    }
+
+    /// Writes eight bytes to memory.
+    ///
+    /// # Arguments
+    /// * `address`
+    /// * `value`
+    pub fn write_doubleword(&mut self, address: u64, value: u64) {
+        if (address % 8) == 0 {
+            let index = (address >> 3) as usize;
+            self.data[index] = value;
+        } else if (address % 4) == 0 {
+            self.write_word(address, (value & 0xffffffff) as u32);
+            self.write_word(address.wrapping_add(4), (value >> 32) as u32);
+        } else {
+            self.write_bytes(address, value, 8);
+        }
+    }
+
+    /// Write multiple bytes to memory.
+    ///
+    /// # Arguments
+    /// * `address`
+    /// * `value`
+    /// * `width` up to eight
+    pub fn write_bytes(&mut self, address: u64, value: u64, width: u64) {
+        for i in 0..width {
+            self.write_byte(address.wrapping_add(i), (value >> (i * 8)) as u8);
+        }
+    }
+
+    /// Check if the address is valid memory address
+    ///
+    /// # Arguments
+    /// * `address`
+    pub fn validate_address(&self, address: u64) -> bool {
+        return (address as usize) < self.data.len();
+    }
+}

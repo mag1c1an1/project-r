@@ -1,9 +1,7 @@
 mod riscv32;
 mod x86;
-pub use riscv32::Executer;
-pub use riscv32::Riscv32;
-pub use riscv32::GUEST_ISA;
-pub use riscv32::ISA_LOGO;
+// pub use riscv32::GUEST_ISA;
+// pub use riscv32::ISA_LOGO;
 
 use crate::common::{Vaddr, Word};
 
@@ -20,4 +18,11 @@ pub trait ISA {
     // get default test img
     fn default_img() -> &'static [u8];
     fn executer() -> Self::Executer;
+}
+
+struct Instruction {
+    mask: u32,
+    data: u32,
+    name: &'static str,
+    operation: fn(cpu: &mut RvCpu, word: u32, address: u64) -> Result<(), i32>,
 }
